@@ -81,6 +81,46 @@ class MoviesController < ApplicationController
     end
   end
 
+
+  # GET /search
+  def search_tmdb
+    @title = params[:search_terms].presence || params[:title]
+    @release_year = params[:release_year]
+    @language = params[:language]
+
+    if @title.blank?
+      @movies = []
+      flash.now[:warning] = "Please fill in all required fields!"
+      return
+    end
+
+    if @release_year.present? || @language.present?
+      @movies = Movie.find_in_tmdb(@title, @release_year, @language)
+    else
+      @movies = Movie.find_in_tmdb(@title)
+    end
+
+    flash.now[:warning] = "No movies found with given parameters!" if @movies.empty?
+  end
+
+  # POST /add_movie
+  def add_movie
+    movie = Movie.new(
+      title: params[:title],
+      release_date: params[:release_date].presence,
+      rating: params[:rating].presence || 'R',
+      description: params[:description]
+    )
+
+    if movie.save
+      redirect_to search_tmdb_path,
+                  notice: "#{movie.title} was successfully added to RottenPotatoes."
+    else
+      redirect_to search_tmdb_path,
+                  alert: "Could not add the movie."
+    end
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_movie
