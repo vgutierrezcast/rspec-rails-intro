@@ -13,11 +13,10 @@ class Movie < ApplicationRecord
 
 
   # Search TMDb and return unsaved Movie objects.
-  def self.find_in_tmdb(title, release_year = nil, language = nil)
+  def self.find_in_tmdb(title, release_year = nil, language = nil, api_key: ENV['TMDB_API_KEY'])
     require 'faraday'
     require 'json'
 
-    api_key = ENV['TMDB_API_KEY']
     raise 'Set the TMDB_API_KEY environment variable before searching.' if api_key.blank?
 
     params = { api_key: api_key, query: title }
